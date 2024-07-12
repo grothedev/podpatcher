@@ -1,0 +1,4 @@
+*.log
+patches.db
+*.tar.gz
+makeAndPushImage.sh

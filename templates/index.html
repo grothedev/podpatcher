@@ -1,0 +1,107 @@
+<html>
+	<head>
+		<style>
+			.box {
+				border: 1px dotted black;
+				padding: 8px;
+			}
+			table, tr, th {
+				border: 1px dashed grey;
+				padding: 4px;
+			}
+			small {
+				font-size: 9px;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>Pod Patcher web tool</h2>
+		<div class = "box">
+			{% if pods == None %}
+			<h3>No kubectl info available</h3>
+			{% else %}
+			<h3>Current Pods:</h3>
+			<table>
+				<tr>
+					<th>Pod</th>
+					<th>Registry, Image, Tag</th>
+					<th>State</th>
+					<th>Container ID</th>
+				</tr>
+				{% for pod in pods %}
+					<tr>
+						<td>{{ pod[0] }}</td>
+						<td>{{ pod[1] }}</td>
+						<td style="font-size:smaller;">{{ pod[2] }}</td>
+						<td><small>{{ pod[3] }}</small></td>
+					</tr>
+				{% endfor %}	
+			</table>
+			{% endif %}
+		</div>
+		<div class = "box">
+			<h3>Patch image with custom software</h3>
+			<form action = "./start" method = "POST" enctype="multipart/form-data">
+				<label for="select-images">Deployment images to Patch</label><br>
+				<select multiple name = "images" id = "select-images">
+					{% for depl in deployments %}
+						<option value="{{ depl }}">{{ depl }}</option>
+					{% endfor %}
+				</select><br>
+				<label for = "tag_from">Tag from which to build your images (blank for currently deployed): </label><br>
+				<input type = "text" name = "tag_from" id = "tag_to" /><br>
+				<label for = "tag_to">Tag for your new images: </label><br>
+				<input type = "text" name = "tag_to" id = "tag_to" /><br>
+				<input type = "file" name = "tarball">.tar.gz containing software</input>
+				<button type="submit">Upload and Make Image(s)</button>
+			</form>
+		</div>
+		<div class = "box">
+			<h3>Set tags for some deployments</h3>
+			<form action = "./set-tag" method = "POST">
+				<label for="select-images">Deployments of which to update tags</label><br>
+				<select multiple name = "images" id = "select-images">
+					{% for depl in deployments %}
+						<option value="{{ depl }}">{{ depl }}</option>
+					{% endfor %}
+				</select><br>
+				<label for = "tag">Tag to apply: </label><br>
+				<input type = "text" name = "tag" id = "tag" /><br>
+				<button type = "submit">Apply Tag</button>
+			</form>
+		</div>
+		<div class = "box">
+			<h3>Pull images from quay</h3>
+			<form action = "./pull-quay" method = "POST">
+				<label for = "images">Image (can be multiple comma-separated)</label>
+				<input type = "text" name = "images" id = "images" /><br>
+				<label for = "tag">Tag</label>
+				<input type = "text" name = "tag" id = "tag" /><br>
+				<button type = "submit">Pull from Quay and push to cluster registry</button>
+			</form>
+		</div>
+		<div class = "box">
+			<h3>Previous Patches Applied</h3>
+			<table>
+				<tr>
+					<th>Patch</th>
+					<th>Tag</th>
+					<th>ID</th>
+					<th>Timestamp</th>
+				</tr>
+				{% for p in patches.values() %}
+					<tr>
+						<td>{{ p.filename }}</td>
+						<td>{{ p.tag }}</td>
+						<td>{{ p.hash }}</td>
+						<td></td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+	</body>
+	<footer>
+		<a href = "https://github.com/grothedev/podpatcher">Source</a>
+	</footer>
+</html>
